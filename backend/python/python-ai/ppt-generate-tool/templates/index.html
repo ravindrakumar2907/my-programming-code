@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>CREWAI Research Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="container-fluid px-0">
+        <div class="row vh-100 gx-0">
+            <div class="col-12 col-md-4 bg-light left-pane d-flex flex-column">
+                <h3 class="p-3">CREWAI Researcher</h3>
+                <div id="chat-history" class="flex-grow-1 p-3 overflow-auto">
+                    {% for msg in chat_history %}
+                    <div class="mb-2">
+                        <span class="badge bg-secondary">{{ msg.role|capitalize }}</span>
+                        {% if msg.tool %}<span class="text-muted small ms-1">{{ msg.tool }}</span> {% endif %}
+                        <div class="{% if msg.role=='user' %}user-msg{% else %}ai-msg{% endif %}">{{ msg.message }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <form id="chat-form" class="p-3 border-top">
+                    <div class="input-group">
+                        <input type="text" id="chat-input" class="form-control" placeholder="Ask me anything..."
+                            autofocus autocomplete="off" required />
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
+                <button class="btn btn-link mt-2 ms-3 text-danger" id="reset-btn">Reset Conversation</button>
+            </div>
+            <div class="col-12 col-md-8 right-pane d-flex flex-column p-4">
+                <h5>Summary Output</h5>
+                <div id="result-area" class="flex-grow-1 p-3 border rounded bg-white overflow-auto"
+                    style="min-height: 300px;">
+                    Start your research by typing a question.
+                </div>
+                <a href="/download_ppt" class="btn btn-success mt-3" id="download-btn" style="display:none;"
+                    download>Download PPT</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const input = document.getElementById('chat-input');
+        const chatHistoryDiv = document.getElementById('chat-history');
+        const resultArea = document.getElementById('result-area');
+        const downloadBtn = document.getElementById('download-btn');
+
+        chatForm.onsubmit = async function (e) {
+            e.preventDefault();
+            if (!input.value.trim()) return;
+            const message = input.value.trim();
+            input.value = '';
+            input.disabled = true;
+
+            // Append user message
+            appendChat('user', message);
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            const data = await response.json();
+            if (data.reply) {
+                appendChat('ai', data.reply);
+                resultArea.innerText = data.reply;
+                if (data.ppt_path) {
+                    downloadBtn.style.display = 'inline-block';
+                }
+            } else if (data.error) {
+                resultArea.innerText = data.error;
+            }
+            input.disabled = false;
+            input.focus();
+        };
+
+        function appendChat(role, msg) {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('mb-2');
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-secondary';
+            badge.innerText = capitalize(role);
+            wrapper.appendChild(badge);
+            const msgDiv = document.createElement('div');
+            msgDiv.className = role === 'user' ? 'user-msg' : 'ai-msg';
+            msgDiv.innerText = msg;
+            wrapper.appendChild(msgDiv);
+            chatHistoryDiv.appendChild(wrapper);
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+        }
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        document.getElementById('reset-btn').onclick = async function () {
+            await fetch('/reset', { method: 'POST' });
+            chatHistoryDiv.innerHTML = '';
+            resultArea.innerText = 'Start your research by typing a question.';
+            downloadBtn.style.display = 'none';
+        };
+    </script>
+</body>
+
+</html>

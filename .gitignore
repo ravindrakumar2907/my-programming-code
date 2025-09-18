@@ -20,3 +20,9 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+**.DS_Store
+**.env
+
+
+
+GeneralIgnore .DS_Store files in all directories and subdirectories**/.DS_StoreEnvironment variablesIgnore all .env files.env.env.*.flaskenvPythonByte-code and temporary filespycache/*.py[cod]*.pyo*.pydVirtual environmentvenv/.venv/env/.env/JavaClass and executable files*.class*.jar*.war*.earGradle.gradle//build/IDE and Editor filesIntelliJ IDEA.idea/.vscode/Eclipse.classpath.project.settings/Frontend (Node.js, etc.)Node modulesnode_modules/Build directories/dist//build//out/.npm/Logs and debug files.lognpm-debug.logyarn-debug.log*yarn-error.log*

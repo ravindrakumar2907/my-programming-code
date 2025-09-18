@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CrewAI Chat - Perplexity Style</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+    <div class="container-fluid px-0">
+        <div class="row vh-100 gx-0">
+            <!-- Sidebar (Chat input + history) -->
+            <div class="col-12 col-md-4 bg-light left-pane d-flex flex-column">
+                <h3 class="p-3">CrewAI Chat</h3>
+                <div id="chat-history" class="flex-grow-1 p-3 overflow-auto">
+                    {% for msg in chat_history %}
+                    <div class="mb-2">
+                        <span class="badge bg-secondary">{{ msg.role|capitalize }}</span>
+                        <span class="text-muted small">{{ msg.get('tool','') }}</span>
+                        <div class="{% if msg.role=='user' %}user-msg{% else %}ai-msg{% endif %}">{{ msg.message }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <form id="chat-form" class="p-3 border-top">
+                    <div class="input-group">
+                        <input type="text" id="chat-input" class="form-control" placeholder="Type your message..."
+                            autocomplete="off" required>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
+                <button class="btn btn-link mt-2 ms-3 text-danger" id="reset-btn">Reset Conversation</button>
+            </div>
+            <!-- Result/main area -->
+            <div class="col-12 col-md-8 right-pane d-flex flex-column">
+                <div class="flex-grow-1 p-4" id="result-area">
+                    <div id="latest-result" class="fs-4 text-secondary">Start chatting to see results here.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.getElementById('chat-form').onsubmit = async function (e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            if (!input.value.trim()) return;
+            fetch("/chat", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: input.value })
+            })
+                .then(resp => resp.json())
+                .then(data => {
+                    if (data.reply) {
+                        updateChat(data.history);
+                        document.getElementById('latest-result').innerText = data.reply;
+                    } else {
+                        document.getElementById('latest-result').innerText = (data.error || 'Error');
+                    }
+                    input.value = "";
+                    input.focus();
+                });
+        };
+
+        function updateChat(history) {
+            let ch = document.getElementById('chat-history');
+            ch.innerHTML = "";
+            history.forEach(msg => {
+                let role = `<span class="badge bg-secondary">${msg.role.charAt(0).toUpperCase() + msg.role.slice(1)}</span>`;
+                let tool = msg.tool ? `<span class="text-muted small">${msg.tool}</span>` : '';
+                let txt = `<div class="${msg.role == 'user' ? 'user-msg' : 'ai-msg'}">${msg.message}</div>`;
+                let row = `<div class="mb-2">${role} ${tool} ${txt}</div>`;
+                ch.innerHTML += row;
+            });
+        }
+
+        document.getElementById('reset-btn').onclick = function () {
+            fetch("/reset", { method: "POST" })
+                .then(() => { location.reload(); });
+        };
+    </script>
+</body>
+
+</html>

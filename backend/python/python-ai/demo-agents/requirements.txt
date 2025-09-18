@@ -1,0 +1,15 @@
+flask
+flask-session
+python-dotenv
+bootstrap-flask
+requests
+crewai>=0.30.0
+ddgs>=1.7.6
+python-pptx>=0.6.21
+litellm>=1.34.0
+google-genai
+termcolor
+colorama
+crewai_tools
+Certificates
+duckduckgo_search

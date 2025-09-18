@@ -1,0 +1,42 @@
+body,
+html {
+    height: 100%;
+}
+
+.left-pane {
+    border-right: 2px solid #eee;
+    min-width: 290px;
+}
+
+.right-pane {
+    background-color: #f7f9fa;
+}
+
+.user-msg {
+    background: #e8f0fe;
+    padding: 8px 14px;
+    border-radius: 10px 10px 0 10px;
+    margin-top: 4px;
+    margin-left: 20px;
+}
+
+.ai-msg {
+    background: #fff7e6;
+    padding: 8px 14px;
+    border-radius: 10px 10px 10px 0;
+    margin-top: 4px;
+    margin-right: 20px;
+}
+
+#chat-history {
+    max-height: 60vh;
+}
+
+@media (max-width: 767px) {
+
+    .left-pane,
+    .right-pane {
+        min-width: 100% !important;
+        border-right: none;
+    }
+}

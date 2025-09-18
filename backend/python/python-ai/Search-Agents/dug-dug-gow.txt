@@ -1,0 +1,10 @@
+How the code works:
+Installation: The pip install commands ensure you have the core crewai library, its tools, and the duckduckgo-search library itself.
+
+Tool Definition: The @tool decorator from crewai_tools is used to create a custom tool. The search_tool function is a simple wrapper around DuckDuckGoSearchRun().run(query), which performs the actual search. CrewAI's agents can now call this tool by its name, "DuckDuckGoSearch."
+
+Agent Setup: The researcher agent is defined with a specific role, goal, and backstory. Most importantly, tools=[search_tool] gives it access to the search capability.
+
+Task Definition: The research_task explicitly instructs the researcher agent to use its tools to find information. The writing_task is designed to be performed by the writer agent, which will use the output from the research task.
+
+Crew Creation and Execution: The Crew object brings the agents and tasks together. The verbose=2 setting is helpful for seeing exactly when the agents are thinking and using their tools. The crew.kickoff() method starts the entire process.

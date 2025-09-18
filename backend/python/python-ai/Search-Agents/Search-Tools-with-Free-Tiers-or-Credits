@@ -1,0 +1,28 @@
+### Search Tools with Free Tiers or Credits
+
+##Tavily Search API: This is one of the most popular search tools for CrewAI. It is specifically built for AI agents and offers a free tier. While the exact number of free credits can change, they generally provide a generous amount of free search queries, making it a perfect starting point for your projects.
+
+##SerperDev: Serper provides an API for Google Search results. They offer a free tier that gives you a limited number of free queries per month (e.g., 2,500). This is a great way to use Google's search power in your agents for free.
+
+
+##DuckDuckGo Search: You can create your own custom search tool using the DuckDuckGo Search API. This is a very popular, completely free option. CrewAI tutorials often show how to set this up, as it doesn't require an API key and is an excellent way to add web-browsing capabilities to your agents without any cost.
+
+##Brave Search API: Brave offers a free API key for its search engine, which can be integrated into CrewAI. This is another good option for a privacy-focused and free search tool.
+
+
+#####################################################################################
+Large Language Models (LLMs)
+While not a tool in the same sense as a search API, the LLM is the core of your agents, and their API costs can quickly add up. Here are some free options:
+
+OpenAI Free Trial: When you sign up for an OpenAI account, they typically provide free credits (often in the range of a few dollars) that you can use to experiment with their models like GPT-3.5 and GPT-4. This is a great way to test the capabilities of a powerful, state-of-the-art model without paying upfront.
+
+Local LLMs with Ollama: This is arguably the most powerful way to run CrewAI for free. You can use the ollama integration to run various open-source models (e.g., Llama 3, Mixtral, Mistral) on your local machine. This has no API cost and allows you to experiment with a wide range of models. The only cost is the electricity to run your computer.
+
+Hugging Face: Some models on Hugging Face can be run for free. You can explore their free inference endpoints to use a variety of open-source models.
+
+Together.ai: Together.ai provides a platform for running open-source models with competitive pricing. They often provide a small amount of free credit to new users, which can be enough for several small-scale projects.
+
+Other Useful Tools
+File I/O Tools: CrewAI has native tools for reading and writing to files (e.g., FileReadTool, FileWriteTool). These tools are completely free to use.
+
+Scraping Tools: Some web scraping tools like ScrapeWebsiteTool are built into CrewAI and don't require an external API key, as they are essentially a wrapper around a Python library.
