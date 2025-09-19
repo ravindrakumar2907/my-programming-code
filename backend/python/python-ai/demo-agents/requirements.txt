@@ -13,3 +13,7 @@ colorama
 crewai_tools
 Certificates
 duckduckgo_search
+langchain_community
+langchain-groq
+langchain
+langchain-huggingface

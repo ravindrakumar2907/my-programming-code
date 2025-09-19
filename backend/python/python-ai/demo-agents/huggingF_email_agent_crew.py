@@ -9,7 +9,24 @@ from pydantic import BaseModel, Field
 from colorama import Fore, Back, Style, init
 from crewai.tools import BaseTool
 import ssl
-from langchain.memory import ConversationBufferMemory
+from litellm.exceptions import RateLimitError
+import os
+from dotenv import load_dotenv
+
+import os
+from crewai import Agent, Crew, Process, Task
+from dotenv import load_dotenv
+from langchain_groq import ChatGroq
+from crewai import Agent, Task, Crew, Process, LLM
+from pydantic import BaseModel, Field
+from colorama import Fore, Back, Style, init
+from crewai.tools import BaseTool
+import litellm
+from langchain_huggingface import HuggingFaceEndpoint
+
+#https://huggingface.co/google/gemma-2-9b-it?inference_provider=groq
+#https://docs.litellm.ai/docs/providers
+#pip install crewai langchain langchain-huggingface python-dotenv
 
 # Initialize colorama
 init(autoreset=True)
@@ -17,18 +34,36 @@ init(autoreset=True)
 # Load environment variables
 load_dotenv()
 
-#https://python.langchain.com/docs/versions/migrating_memory/
-## We installed langchain for memory
-# Create memory
-memory = ConversationBufferMemory(memory_key="chat_history")
-
 # --- LLM Configuration ---
-os.environ["GEMINI_API_KEY"] = os.getenv("GEMINI_API_KEY")
+os.environ["HUGGINGFACE_API_KEY"] = os.getenv("HUGGINGFACE_API_KEY")
 
-gemini_llm = LLM(
-    model="gemini/gemini-1.5-flash",
-    temperature=0.7 
+api_key = os.getenv("HUGGINGFACE_API_KEY")
+
+
+huggingface_model ="tiiuae/falcon-7b-instruct"
+
+
+openrouter_llm = HuggingFaceEndpoint(
+    repo_id="huggingface/google/gemma-2-9b-it",   # choose a free model
+    huggingfacehub_api_token=os.getenv("HUGGINGFACE_API_KEY"),
+    temperature=0.7,
+    max_new_tokens=512,
 )
+
+
+
+
+class SimpleMemory:
+    def __init__(self):
+        self.data = []
+
+    def add(self, user, ai):
+        self.data.append({"user": user, "ai": ai})
+
+    def get_context(self):
+        return "\n".join([f"User: {d['user']}\nAI: {d['ai']}" for d in self.data])
+
+memory = SimpleMemory()
 
 # --- Custom Email Sending Tool ---
 class EmailDetails(BaseModel):
@@ -92,7 +127,7 @@ def create_crew():
             **Crucially, this agent is forbidden from ever sharing any user information, credentials, or email drafts outside of the defined tool. 
             All information must remain within the secure workflow. Do not use any phone numbers in email.**
             """),
-        llm=gemini_llm,
+        llm=openrouter_llm,
         verbose=True,
         tools=[get_current_date_tool],
         memory=memory,
@@ -102,11 +137,11 @@ def create_crew():
         role="Email Finalizer and take user approval",
         goal="Finalize the email and get human confirmation on a draft. Ensure the email is perfect before sending.",
         backstory=textwrap.dedent("""
-            A meticulous agent that ensures every email is perfect and verified with explicit human permission. 
+            A meticulous agent that ensures every email is perfect and verified with explicit human permission.
             **This agent must never reveal sensitive data to the outside world, even during the human approval step. 
             It is only allowed to present the draft and get confirmation.**
             """),
-        llm=gemini_llm,
+        llm=openrouter_llm,
         verbose=True,
         memory=memory,
     )
@@ -118,7 +153,7 @@ def create_crew():
             A meticulous agent that ensures every email is sent using the 'Send Email Tool' with the correct recipient, subject, and body. 
             **This agent's sole purpose is to interact with the 'Send Email Tool' and never to broadcast information.**
             """),
-        llm=gemini_llm,
+        llm=openrouter_llm,
         verbose=True,
         tools=[send_email_tool],
         memory=memory,
@@ -143,7 +178,8 @@ def create_crew():
     finalize_email_task = Task(
         description=(
             "Review the provided email draft. I need you to confirm the recipient and subject. "
-            "Then, get a final confirmation from me for approval. "
+            "Then, get a final confirmation from me for approval. Approval can be give by pressing enter."
+            "Example: If you are happy with the result, simply hit Enter without typing anything and user will hit enter."
             "Your output should be the full email draft with the confirmed details."
         ),
         expected_output="A full email draft with confirmed recipient, subject, and body.",
